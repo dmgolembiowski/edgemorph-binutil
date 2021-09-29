@@ -6,7 +6,6 @@ description = "Third-party library for low-level IO on EdgeDB"
 authors = [ 
     "dmgolembiowski <david@dgolembiowski.com>"
 ]
-edition = "2018"
 repository = "https://github.com/dmgolembiowski/edgemorph-binutil"
 license = "Apache"
 readme = "README.md"
