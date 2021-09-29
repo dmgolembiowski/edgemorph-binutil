@@ -1,0 +1,25 @@
+[package]
+name = "edgemorph-binutil"
+version = "0.0.1"
+edition = "2021"
+description = "Third-party library for low-level IO on EdgeDB"
+authors = [ 
+    "dmgolembiowski <david@dgolembiowski.com>"
+]
+edition = "2018"
+repository = "https://github.com/dmgolembiowski/edgemorph-binutil"
+license = "Apache"
+readme = "README.md"
+documentation = "https://docs.rs/edgemorph-binutil"
+
+[dependencies]
+binrw = "0.7.0"
+
+[features]
+default = []
+std = []
+no_std = []
+pyo3 = []
+tokio = []
+async_std = []
+
