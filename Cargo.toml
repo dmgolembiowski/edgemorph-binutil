@@ -10,6 +10,8 @@ license-file  = "LICENSE"
 readme        = "README.md"
 documentation = "https://docs.rs/edgemorph-binutil"
 keywords      = ["database", "administration", "edgedb", "wire", "binary"]
+# exclude = ["/target", "/.git"]
+# include = ["/src", "LICENSE", "/examples"]
 
 [lib]
 name              = "edmb"
