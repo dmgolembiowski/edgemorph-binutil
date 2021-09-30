@@ -1,64 +1,59 @@
-use binrw::{self, BinRead, BinReaderExt, derive_binread, NullString, io::{Read, Seek, SeekFrom}};
+use binrw::{
+    binread,
+    io::{Cursor, SeekFrom},
+    prelude::*,
+    NullString 
+};
+
+
 use std::io::BufReader;
 use std::path::Path;
+//mod reader;
 
-pub use binread::Error;
-pub use binread::BinResult;
-
-mod reader;
-
-#[derive(BinRead, Debug, PartialEq)]
-pub struct EdbDumpFile {
-
+#[binread]
+struct EdbDumpFile {
     /// Dump file format marker
-    pub fmt_marker: FmtMarker,
+    fmt_marker: FmtMarker,
 
     /// Format version number (8 bytes)
     #[br(temp)]
-    pub version_number: u32,
+    version_number: i64,
 
-    pub dump_header: DumpHeader,
-
-    #[br(count = file_count)]
-    pub files: Vec<FileEntry>,
+    dump_header: DumpHeader,
 }
 
-#[derive(BinRead, Debug, PartialEq)]
-#[br(magic = b"\xFF\xD8\x00\x00\xD8EDGEDB\x00DUMP\x00")]
-pub struct FmtMarker (
+#[binread]
+#[br(little, magic = b"\xFF\xD8\x00\x00\xD8EDGEDB\x00DUMP\x00")]
+struct FmtMarker (#[br(default)] u32);
+
+#[binread]
+struct DumpHeader {
     #[br(temp)]
-    u32,
-);
+    mtype: i8,
 
-
-#[derive(BinRead, Debug, PartialEq)]
-pub struct DumpHeader {
-    /// Message type
     #[br(temp)]
-    pub mtype: i8,
+    checksum: [u8; 20],
 
-    /// SHA1 hash sum of block data
-    #[br(temp)]
-    pub checksum: [u8; 20],
+    #[br(temp, big)]
+    msg_len: i32,
 
-    /// Length of message contents in bytes,
-    /// including self
-    #[br(temp)]
-    pub msg_len: i32,
-
-    /// Block data
-    /// Should be treated in opaque way by a client.
     #[br(
+        count = msg_len - 4 as i32,
         restore_position,
-        seek_after = SeekFrom::Start(msg_len as u64),
-        try_map = replace_packets,
-        count = msg_len - 4
+        seek_before = SeekFrom::Start(msg_len as u64),
+        map = replace_packets,
     )]
-    pub data: Vec<u8>
+    data: Vec<u8>,
 }
 
+fn replace_packets(byte: &u8) -> u8 {
+    match *byte {
+        0x40 => { 0x48 },
+        0x3d => { 0x44 },
+        rem  => { rem  }
+    }
+}
 
-#[derive(BinRead, Debug, PartialEq)]
 #[cfg(test)]
 mod tests {
     #[test]

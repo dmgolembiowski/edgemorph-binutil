@@ -12,7 +12,7 @@ readme = "README.md"
 documentation = "https://docs.rs/edgemorph-binutil"
 
 [dependencies]
-binrw = "0.7.0"
+binrw = "0.8.0"
 
 [features]
 default = []
