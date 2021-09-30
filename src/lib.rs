@@ -1,3 +1,7 @@
+#![allow(dead_code)]
+#![allow(unused)]
+#![forbid(unsafe_code)]
+
 use binrw::{
     binread,
     io::{Cursor, SeekFrom},
@@ -46,12 +50,15 @@ struct DumpHeader {
     data: Vec<u8>,
 }
 
-fn replace_packets(byte: &u8) -> u8 {
-    match *byte {
-        0x40 => { 0x48 },
-        0x3d => { 0x44 },
-        rem  => { rem  }
-    }
+fn replace_packets(bytes: Vec<u8>) -> Vec<u8> {
+    bytes
+        .into_iter()
+        .map(|byte| match byte {
+            0x40 => { 0x48 },
+            0x3d => { 0x44 },
+            rem  => { rem  }
+        })
+        .collect()
 }
 
 #[cfg(test)]

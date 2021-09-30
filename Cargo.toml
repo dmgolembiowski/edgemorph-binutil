@@ -1,24 +1,38 @@
 [package]
 name = "edgemorph-binutil"
-version = "0.0.1"
+version = "0.1.0-alpha"
 edition = "2021"
-description = "Third-party library for low-level IO on EdgeDB"
-authors = [ 
-    "dmgolembiowski <david@dgolembiowski.com>"
-]
-repository = "https://github.com/dmgolembiowski/edgemorph-binutil"
-license = "Apache"
-readme = "README.md"
+description   = "Third-party library for low-level IO on EdgeDB"
+authors       = ["dmgolembiowski <david@dgolembiowski.com>"]
+homepage      = "https://github.com/dmgolembiowski/edgemorph-binutil"
+repository    = "https://github.com/dmgolembiowski/edgemorph-binutil"
+license-file  = "LICENSE"
+readme        = "README.md"
 documentation = "https://docs.rs/edgemorph-binutil"
+keywords      = ["database", "administration", "edgedb", "wire", "binary"]
+
+[lib]
+name              = "edmb"
+path              = "src/lib.rs"
+test              = true
+doctest           = true
+bench             = true
+doc               = true
+plugin            = false
+proc-macro        = false
+harness           = true
+edition           = "2018"
+crate-type        = ["lib"]
+required-features = ["default"]
 
 [dependencies]
 binrw = "0.8.0"
 
 [features]
-default = []
-std = []
-no_std = []
-pyo3 = []
-tokio = []
+default   = []
+std       = []
+no_std    = []
+pyo3      = []
+tokio     = []
 async_std = []
 
