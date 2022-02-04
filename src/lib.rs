@@ -26,22 +26,22 @@ struct EdbDumpFile {
     dump_header: DumpHeader,
 }
 
-#[binread]
-#[br(little, magic = b"\xFF\xD8\x00\x00\xD8EDGEDB\x00DUMP\x00")]
-struct FmtMarker (#[br(default)] u32);
+#[binrw]
+#[brw(big, magic = b"\xFF\xD8\x00\x00\xD8EDGEDB\x00DUMP\x00")]
+struct FmtMarker (#[brw(default)] u32);
 
-#[binread]
-struct DumpHeader {
-    #[br(temp)]
+#[binrw]
+struct GeneralDumpBlock {
+    #[brw(temp)]
     mtype: i8,
 
-    #[br(temp)]
-    checksum: [u8; 20],
+    #[brw(temp)]
+    sha1sum: [u8; 20],
 
-    #[br(temp, big)]
+    #[brw(temp)]
     msg_len: i32,
 
-    #[br(
+    #[brw(
         count = msg_len - 4 as i32,
         restore_position,
         seek_before = SeekFrom::Start(msg_len as u64),
@@ -49,6 +49,89 @@ struct DumpHeader {
     )]
     data: Vec<u8>,
 }
+
+#[binrw]
+#[brw(magic = 0x48)]
+struct HeaderMsgType ( #[br(default)] i8 );
+
+#[binrw]
+enum Headers {
+    #[brw(default, magic = )]
+}
+#[binrw]
+struct DumpHeader {
+    #[brw(temp)]
+    mtype: HeaderMsgType,
+
+    #[brw(temp)]
+    sha1sum: [u8; 20],
+
+    #[brw(temp)]
+    msg_len: i32,
+
+    #[brw(temp)]
+    major_ver: i16,
+
+    #[brw(temp)]
+    minor_ver: i16,
+
+    #[brw(temp)]
+    num_types: i32,
+
+    #[brw(
+        count = num_types - 4 as i32,
+        restore_position,
+        seek_before = SeekFrom::Start(num_types as u64),
+        map = replace_packets,
+     )]
+    types: Vec<TypeInfo>,
+
+    #[brw(temp)]
+    num_descriptors: i32,
+
+    #[brw(
+        count = num_types - 4 as i32,
+        restore_position,
+        seek_before = SeekFrom::Start(num_descriptors as u64),
+        map = replace_packets,
+     )]
+    descriptors: Vec<ObjectDesc>,
+}
+
+#[binrw]
+struct TypeInfo {
+    #[brw(temp)] 
+    type_name: String,
+
+    #[brw(temp)]
+    type_class: String,
+
+    #[brw(temp)]
+    type_id: [u8; 16],
+}
+
+#[binrw]
+struct ObjectDesc {
+    #[brw(temp)]
+    object_id: [u8; 16],
+
+    #[brw(temp)]
+    description: Vec<u8>,
+
+    #[brw(temp)]
+    num_dependencies: i16,
+
+    #[brw(
+        count = num_dependencies - 2 as i32,
+        restore_position,
+        seek_before = SeekFrom::Start(num_dependencies as u64),
+        map = replace_packets,
+    )]
+    dependency_id: [u8; 16]
+}
+
+
+
 
 fn replace_packets(bytes: Vec<u8>) -> Vec<u8> {
     bytes
